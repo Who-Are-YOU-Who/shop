@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whiz_shop.UserMapper">
+
+    <select id="selectUserRole" parameterType="int" resultType="UserRoleVo">
+        SELECT
+            ur.userSeq,
+            ur.roleSeq,
+            ur.roleShow,
+            r.roleName,
+            r.menuName,
+            r.menuOrder,
+            r.motherMenu
+        FROM t_whizshop_user_role ur LEFT OUTER JOIN t_whizshop_role r ON r.roleSeq = ur.roleSeq
+        WHERE ur.userSeq = #{userSeq}
+        ORDER BY roleSeq
+    </select>
+
+    <!--회원 등급수정을 위해 모든 등급을 가져오는 SQL-->
+    <select id="selectAllcustomerGrade" resultType="GradeVo">
+        SELECT * FROM t_whizshop_grade
+    </select>
+
+    <select id="selectAllCustomer" resultType="CustomerVo">
+        SELECT
+            c.customerSeq,
+            c.customerId,
+            c.customerName,
+            c.customerBday,
+            c.customerMobile,
+            c.customerEmail,
+            c.customerEditor,
+            c.customerEditDate,
+            c.customerDel,
+            cg.gradeSeq,
+            g.gradeName AS customerGrade
+        FROM t_whizshop_customer c LEFT OUTER JOIN t_whizshop_customer_grade cg ON c.customerSeq = cg.customerSeq
+                                   LEFT OUTER JOIN t_whizshop_grade g ON cg.gradeSeq= g.gradeSeq
+    </select>
+
+    <!--관리자 관리 페이지 모든 관리자 select-->
+    <select id="selectAllUser" resultType="UserVo">
+        SELECT * FROM t_whizshop_user
+    </select>
+
+    <!--관리자의 권한 리스트-->
+    <select id="selectAllUserRole" parameterType="int" resultType="UserRoleVo">
+        SELECT
+            ur.userSeq,
+            ur.roleSeq,
+            ur.roleShow,
+            r.menuName
+        FROM t_whizshop_user_role ur LEFT OUTER JOIN t_whizshop_role r
+                                                     ON ur.roleSeq = r.roleSeq
+            WHERE userSeq = #{userSeq}
+    </select>
+
+    <!--권한 리스트-->
+    <select id="allRole" resultType="UserRoleVo">
+        SELECT * FROM t_whizshop_role
+    </select>
+
+    <update id="editCustomer" parameterType="CustomerVo">
+        UPDATE t_whizshop_customer SET
+             customerId = #{customerId},
+             customerName = #{customerName},
+             customerBday = #{customerBday},
+             customerMobile = #{customerMobile},
+             customerEmail = #{customerEmail},
+             customerEditor = #{customerEditor},
+             customerEditDate =  now(),
+             customerDel = #{customerDel}
+                WHERE customerSeq = #{customerSeq}
+    </update>
+
+    <update id="editCustomerGrade" parameterType="CustomerGradeVo">
+        UPDATE t_whizshop_customer_grade SET
+               gradeSeq = #{gradeSeq},
+               userSeq = #{userSeq},
+               cusGradeUpdate = #{cusGradeUpdate}
+            WHERE customerSeq = #{customerSeq}
+    </update>
+
+    <delete id="deleteCustomer" parameterType="int">
+        DELETE FROM t_whizshop_customer
+            WHERE customerSeq = #{customerSeq}
+    </delete>
+
+    <select id="selectAllRole" resultType="int">
+        SELECT roleSeq from t_whizshop_role
+    </select>
+
+    <!--관리자 권한 부여-->
+    <update id="editUserRole" parameterType="java.util.List">
+    <foreach item="item" index="index" collection="list" separator=";" >
+        UPDATE t_whizshop_user_role SET
+            roleShow = #{item.roleShow}
+        WHERE userSeq = #{item.userSeq} AND roleSeq=#{item.roleSeq}
+    </foreach>
+    </update>
+</mapper>

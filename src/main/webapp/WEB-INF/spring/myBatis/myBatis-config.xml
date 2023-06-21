@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- http://www.mybatis.org/mybatis-3/ko/configuration.html -->
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="false"/>
+        <setting name="multipleResultSetsEnabled" value="true"/>
+        <setting name="useColumnLabel" value="true"/>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <setting name="defaultStatementTimeout" value="25000"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="VARCHAR"/>
+        <!-- <setting name="callSettersOnNulls" value="true" /> -->
+    </settings>
+
+    <typeAliases>
+        <typeAlias type="com.whizlab_shop.vo.CustomerVo" alias="CustomerVo"/>
+        <typeAlias type="com.whizlab_shop.vo.UserVo" alias="UserVo"/>
+        <typeAlias type="com.whizlab_shop.vo.AddressVo" alias="AddressVo"/>
+        <typeAlias type="com.whizlab_shop.vo.CustomerGradeVo" alias="CustomerGradeVo"/>
+        <typeAlias type="com.whizlab_shop.vo.UserRoleVo" alias="UserRoleVo"/>
+        <typeAlias type="com.whizlab_shop.vo.GradeVo" alias="GradeVo"/>
+        <typeAlias type="com.whizlab_shop.vo.BigCategoryVo" alias="BigCategoryVo"/>
+        <typeAlias type="com.whizlab_shop.vo.SmallCategoryVo" alias="SmallCategoryVo"/>
+        <typeAlias type="com.whizlab_shop.vo.ProductVo" alias="ProductVo"/>
+        <typeAlias type="com.whizlab_shop.vo.ProductImgVo" alias="ProductImgVo"/>
+        <typeAlias type="com.whizlab_shop.vo.ProductStkPrcVo" alias="ProductStkPrcVo"/>
+        <typeAlias type="com.whizlab_shop.vo.ProductSearchVo" alias="ProductSearchVo"/>
+        <typeAlias type="com.whizlab_shop.vo.MainProductVo" alias="MainProductVo"/>
+        <typeAlias type="com.whizlab_shop.vo.MainProductVo" alias="MainProductVo"/>
+        <typeAlias type="com.whizlab_shop.vo.userRoleChangeVo" alias="userRoleChangeVo"/>
+        <typeAlias type="com.whizlab_shop.vo.CartVo" alias="CartVo"/>
+    </typeAliases>
+
+    <mappers>
+        <mapper resource="SQLmapper/mapper/Login_SQL.xml" />
+        <mapper resource="SQLmapper/mapper/User_SQL.xml" />
+        <mapper resource="SQLmapper/mapper/Product_SQL.xml" />
+        <mapper resource="SQLmapper/mapper/Customer_SQL.xml" />
+    </mappers>
+</configuration>

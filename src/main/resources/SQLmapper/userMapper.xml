@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whizlab_shop.mapper.UserMapper">
+    <select id="chkLogin" resultType="com.whizlab_shop.vo.UserVo" parameterType="String">
+        SELECT *
+        FROM t_whizlab_customer
+        WHERE customerWebID = #{customerWebID}
+          AND customerWebPW = #{customerWebPW}
+    </select>
+
+    <!-- 정보 수정 -->
+    <update id="editUser" parameterType="java.util.Map">
+        UPDATE t_whizlab_customer
+        SET customerMobile = #{customerMobile},
+            customerManagerMobile = #{customerManagerMobile},
+            customerWebPW = #{customerWebPW}
+        WHERE customerSeq = #{customerSeq}
+    </update>
+</mapper>

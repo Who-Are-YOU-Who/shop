@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whiz_shop.CustomerMapper">
+
+    <insert id="addCart" parameterType="CartVo">
+        INSERT INTO t_whizshop_cart
+        (customerSeq,prodSeq,prodCount) VALUES (#{customerSeq},#{prodSeq},#{prodCount})
+    </insert>
+
+    <select id="selectAddress" parameterType="map" resultType="AddressVO">
+        SELECT
+            customerSeq,
+            addressSeq,
+            addressName,
+            address
+        FROM whizshop.t_whizshop_address
+        WHERE customerSeq=#{customerSeq} AND addressName = #{addressName}
+    </select>
+</mapper>

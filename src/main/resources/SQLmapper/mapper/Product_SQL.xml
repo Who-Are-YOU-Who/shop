@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whiz_shop.ProductMapper">
+
+    <select id="selectAllBigCategory" resultType="BigCategoryVo">
+        SELECT * FROM t_whizshop_bigcategory
+    </select>
+
+    <select id="selectAllSmallCategory" resultType="SmallCategoryVo">
+        SELECT * FROM t_whizshop_smallcategory
+    </select>
+
+    <select id="selectSmallCategoryByBigCategory" parameterType="int" resultType="SmallCategoryVo">
+        SELECT * FROM t_whizshop_smallcategory
+        WHERE bigCateSeq = #{bigCateSeq}
+    </select>
+
+    <insert id="insertProduct" parameterType="ProductVo">
+        INSERT INTO t_whizshop_product
+        (smallCateSeq,prodCode,prodName,prodManufacturingCountry,prodManufacturingFactory,
+         prodComponent,deliveryPrice,simpleExplain,regiDate,prodSummernote,starAverage,userSeq,prodDel)
+        VALUES
+            (#{smallCateSeq},#{prodCode},#{prodName},#{prodManufacturingCountry},#{prodManufacturingFactory},
+             #{prodComponent},#{deliveryPrice},#{simpleExplain},now(),#{prodSummernote},0,#{userSeq}
+             ,#{prodDel})
+    </insert>
+
+    <!--상품썸네일 등록을 위한 상품명으로 시퀀스 찾기-->
+    <select id="selectProdSeq" parameterType="String" resultType="int">
+        SELECT prodSeq FROM t_whizshop_product
+        WHERE prodName = #{prodName}
+    </select>
+
+    <!--이미지 insert-->
+    <insert id="insertProdImg" parameterType="ProductImgVo">
+        INSERT INTO t_whizshop_prodimg
+        (prodSeq, prodImgPath) values (#{prodSeq},#{prodImgPath})
+    </insert>
+
+    <!--입력된 상품코드와 유사한 상품코드, 상품시퀀스 select-->
+    <select id="selectProductByProdCode" parameterType="String" resultType="ProductVo">
+        SELECT
+            p.prodSeq,
+            p.prodName,
+            p.prodCode,
+            psp.prodStkPrcSeq,
+            psp.prodStock,
+            psp.purchasePrice,
+            psp.prodSalePrice,
+            psp.prodStkPrcDate
+        FROM t_whizshop_prodstkprc psp LEFT OUTER JOIN t_whizshop_product p
+                                                       ON psp.prodSeq = p.prodSeq
+        WHERE prodCode LIKE #{prodCode}
+    </select>
+
+    <!--상품 재고, 단가 등록-->
+    <insert id="insertProductStckPrice" parameterType="ProductStkPrcVo">
+        INSERT INTO t_whizshop_prodstkprc
+        (prodSeq,prodStock,purchasePrice,prodSalePrice,prodStkPrcDate,userSeq) VALUES (#{prodSeq},#{prodStock},#{purchasePrice},#{prodSalePrice},now(),#{userSeq})
+    </insert>
+
+    <!--상품 재고, 단가 목록-->
+    <select id="selectAllProductStckPrc" resultType="ProductStkPrcVo">
+        SELECT
+            p.prodName,
+            p.prodCode,
+            psp.prodStkPrcSeq,
+            psp.prodStock,
+            psp.purchasePrice,
+            psp.prodSalePrice,
+            psp.prodStkPrcDate
+        FROM t_whizshop_prodstkprc psp LEFT OUTER JOIN t_whizshop_product p
+                                                       ON psp.prodSeq = p.prodSeq
+    </select>
+
+    <!--상품 재고, 단가 수정-->
+    <update id="updateProductStockPrice" parameterType="ProductStkPrcVo">
+        UPDATE t_whizshop_prodstkprc SET
+            prodStock = #{prodStock},
+            purchasePrice = #{purchasePrice},
+            prodSalePrice = #{prodSalePrice},
+            prodStkPrcEditor = #{prodStkPrcEditor},
+            prodStkPrcUpdate = now()
+        WHERE prodStkPrcSeq = #{prodStkPrcSeq}  and prodSeq=#{prodSeq}
+    </update>
+
+    <!--분류,등록기간,상품코드,판매상태로 상품 검색(상품수정페이지용)-->
+    <select id="searchProduct" parameterType="ProductSearchVo" resultType="ProductVo">
+        SELECT
+        SUM(psp.prodStock)as prodStock,
+        p.prodName,
+        p.prodSeq,
+        p.prodCode,
+        p.prodDel,
+        p.regiDate,
+        pi2.prodImgPath
+        FROM t_whizshop_prodstkprc AS psp
+        LEFT OUTER JOIN t_whizshop_product AS p
+        ON psp.prodSeq = p.prodSeq
+        left OUTER JOIN (SELECT min(prodImgSeq), prodSeq, prodImgPath FROM t_whizshop_prodimg group by prodSeq )as pi2
+        on p.prodSeq = pi2.prodSeq
+        WHERE
+        <trim prefixOverrides="OR">
+        <if test="smallCateSeq!=null or smallCateSeq!='' ">
+             p.smallCateSeq = #{smallCateSeq} OR
+        </if>
+        <if test="minDate!=null or minDate!=''">
+             p.regiDate >= #{minDate} OR
+        </if>
+        <if test="maxDate!=null or maxDate!=''">
+            #{maxDate} >= p.regiDate OR
+        </if>
+        <if test="prodCode!=null or prodCode!=''">
+             p.prodCode = #{prodCode} OR
+        </if>
+        <if test="prodDel!=null or prodDel!=''">
+             p.prodDel = #{prodDel}
+        </if>
+        </trim>
+        GROUP BY psp.prodSeq
+    </select>
+
+    <!--상품시퀀스로 상품정보 가져오기-->
+    <select id="selectProductByProdSeq" parameterType="int" resultType="ProductVo">
+        SELECT
+            p.prodSeq,
+            p.smallCateSeq,
+            p.prodCode,
+            p.prodName,
+            p.prodManufacturingCountry,
+            p.prodManufacturingFactory,
+            p.prodComponent,
+            p.deliveryPrice,
+            p.simpleExplain,
+            p.prodSummernote,
+            p.regiDate,
+            p.starAverage,
+            p.prodDel,
+            psp.prodSalePrice,
+            psp.prodStock,
+            pi.prodImgPath
+        FROM t_whizshop_product p
+                 LEFT OUTER JOIN (SELECT prodStock,prodSalePrice,prodSeq FROM t_whizshop_prodstkprc psp WHERE psp.prodStock!=0 GROUP BY prodSeq) psp
+                                 ON p.prodSeq = psp.prodSeq
+                 LEFT OUTER JOIN (SELECT min(prodImgSeq),prodImgPath,prodSeq FROM t_whizshop_prodimg GROUP BY prodSeq )AS pi ON p.prodSeq = pi.prodSeq
+        WHERE p.prodSeq = #{prodSeq}
+    </select>
+
+    <!--상품이미지 리스트 가져오기-->
+    <select id="selectImages" parameterType="int" resultType="ProductImgVo">
+        SELECT *
+        FROM t_whizshop_prodimg
+        WHERE prodSeq = #{prodSeq}
+    </select>
+
+    <!--상품명으로 이미지 가져오기(메인페이지 등록용)-->
+    <select id="selectImagesByProdName" parameterType="String" resultType="ProductImgVo">
+        SELECT *
+        FROM t_whizshop_prodimg
+        WHERE prodName = #{prodName}
+    </select>
+
+    <!--메인페이지 등록 상품들 가져오기-->
+    <select id="mainPageProduct" resultType="MainProductVo">
+        SELECT
+            m.mainSeq,
+            m.prodSeq,
+            m.imgPath,
+            p.prodName,
+            p.simpleExplain,
+            psp.prodSalePrice
+        FROM t_whizshop_main m  LEFT OUTER JOIN t_whizshop_product p
+                                                ON p.prodSeq = m.prodSeq
+                                LEFT OUTER JOIN (SELECT prodSalePrice,prodSeq FROM t_whizshop_prodstkprc psp WHERE psp.prodStock!=0 GROUP BY prodSeq)psp
+                                    ON p.prodSeq = psp.prodSeq
+        ORDER BY mainSeq
+    </select>
+
+    <select id="searchProdCode" parameterType="String" resultType="ProductVo">
+        SELECT
+            prodCode,
+            prodSeq
+        FROM t_whizshop_product
+        WHERE prodCode LIKE #{prodCode}
+    </select>
+
+    <!--판매상태 바꾸기-->
+    <update id="updateProductDel" parameterType="map">
+        UPDATE t_whizshop_product SET
+              prodDel = #{prodDel}
+        WHERE prodSeq = #{prodSeq}
+    </update>
+</mapper>
+
+

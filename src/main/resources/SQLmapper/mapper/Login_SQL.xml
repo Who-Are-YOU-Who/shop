@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whiz_shop.LoginMapper">
+
+    <!--회원 아이디 중복체크-->
+    <select id="checkIdDupicate" resultType="int">
+        SELECT count(*)  FROM t_whizshop_customer
+            WHERE customerId = #{customerId}
+    </select>
+
+    <!--관리자 아이디 중복체크-->
+    <select id="checkUserIdDupicate" resultType="int">
+        SELECT count(*)  FROM t_whizshop_user
+        WHERE userId = #{userId}
+    </select>
+
+    <!--회원 등록-->
+    <insert id="customerInsert" parameterType="CustomerVo">
+        INSERT INTO t_whizshop_customer  (customerId, customerPw, customerName, customerBday, customerMobile,customerEmail)
+        VALUES (#{customerId},#{customerPw},#{customerName},#{customerBday},#{customerMobile},#{customerEmail})
+    </insert>
+
+    <!--회원시퀀스 가져오기-->
+    <select id="getCustomerSeq" parameterType="String" resultType="int">
+        SELECT customerSeq FROM t_whizshop_customer WHERE customerId = #{customerId}
+    </select>
+
+    <!--회원배송지 등록-->
+    <insert id="addressInsert" parameterType="AddressVo">
+        INSERT INTO t_whizshop_address (customerSeq,addressName,address) VALUES (#{customerSeq},#{addressName},#{address})
+    </insert>
+
+    <!--회원등급 등록-->
+    <insert id="customerGrade" parameterType="CustomerGradeVo">
+        INSERT INTO t_whizshop_customer_grade (customerSeq,gradeSeq,userSeq,cusGradeUpdate) VALUES(#{customerSeq},#{gradeSeq},#{userSeq},#{cusGradeUpdate})
+    </insert>
+
+    <!--회원 로그인-->
+    <select id="checkLogin" resultType="CustomerVo">
+        SELECT * FROM t_whizshop_customer
+        WHERE customerId = #{customerId} AND customerPw = #{customerPw}
+    </select>
+
+    <!--관리자 등록-->
+    <insert id="userInsert">
+        INSERT INTO t_whizshop_user (userId, userPw, userName, userEmail, userMobile, userDel,master)
+        VALUES (#{userId},#{userPw},#{userName},#{userEmail},#{userMobile},'N','N')
+    </insert>
+    
+    <!--관리자시퀀스가져오기-->
+    <select id="getUserSeq" parameterType="String" resultType="int">
+        SELECT userSeq from t_whizshop_user WHERE userId= #{userId}
+    </select>
+
+    <!--관리자 등록시 권한세팅-->
+    <insert id="userRoleInsert" parameterType="java.util.Map">
+        INSERT INTO t_whizshop_user_role (userSeq, roleSeq, roleShow) VALUES
+        <foreach item="item" index="index" collection="roleList" separator=",">
+             (#{userSeq},#{item.value},'N')
+        </foreach>
+
+    </insert>
+
+    <!--관리자 로그인-->
+    <select id="checkuserLogin" resultType="UserVo">
+        SELECT * FROM t_whizshop_user WHERE userId=#{userId} AND userPw=#{userPw}
+    </select>
+
+    <!--관리자 권한 부여-->
+
+</mapper>
